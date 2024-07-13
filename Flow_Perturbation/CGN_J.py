@@ -2,21 +2,21 @@ import torch
 import os
 from bgmol.datasets import ChignolinOBC2PT
 import numpy as np
-from train_model import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
-from src.modules.DDPM import interpolate_parameters
+from train_model_CGN import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
+from src.DDPM import interpolate_parameters
 from utils import DDPMSamplerCOM
-from src.modules.components.common import MLP
-from train_Var import (n_dimensions, n_particles, ndim, back_coeff,time_forward)
-from src.utils.common import remove_mean, modify_samples_torch_batched_K
+from src.common import MLP
+from train_Var_CGN import (n_dimensions, n_particles, ndim, back_coeff,time_forward)
+from src.utils import remove_mean, modify_samples_torch_batched_K,clean_up
 
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
 is_data_here = os.path.isdir("ChignolinOBC2PT")
 dataset = ChignolinOBC2PT(download=not is_data_here, read=True)
 
-system = dataset.system
+#system = dataset.system
 
-model = MLP(hidden_size=2048,hidden_layers=12).to(device)			# 输出维度是2，输入是x和step
+model = MLP(ndim=ndim,hidden_size=2048,hidden_layers=12).to(device)		
 if os.path.exists('models/CGN/model_RotAug_LowLR.pth'):			
     model.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR.pth'))
 else:
@@ -31,9 +31,6 @@ target_energy = dataset.get_energy_model(n_simulation_steps=0)
 
 
 for param in model.parameters():
-    param.requires_grad = False
-
-for param in model_var.parameters():
     param.requires_grad = False
 
 def score_function_rearange(t, x):
@@ -109,7 +106,7 @@ if __name__ == '__main__':
 
 
     sampN = 10000
-    batch_size = 750
+    batch_size = 200
     xT_init = torch.randn(sampN, ndim).to(device)
     xT_init = remove_mean(xT_init, n_particles, n_dimensions)
 
@@ -147,7 +144,7 @@ if __name__ == '__main__':
     ux = data['ux'].to(device)
     log_omega = data['log_omega'].to(device)
     '''   
-    def save_mcmc_states(xT, log_omega, x0, ux, energy_MC_ten, acceptance_numbers, mc_round, prefix=f'CGN/CGN-J-{back_coeff}-{K_x}'):
+    def save_mcmc_states(xT, log_omega, x0, ux, energy_MC_ten, acceptance_numbers, mc_round, prefix=f'data/CGN-J-{back_coeff}-{K_x}'):
         # Create clones of the tensors and move them to CPU
         xT_clone = xT.clone().cpu()
         log_omega_clone = log_omega.clone().cpu()
@@ -226,13 +223,13 @@ if __name__ == '__main__':
     }
 
     # Save the state dictionary to a file
-    torch.save(state_dict, f'CGN/CGN-J-{back_coeff}-{K_x}.pth')
+    torch.save(state_dict, f'data/CGN-J-{back_coeff}-{K_x}.pth')
 
     concatenated_x0_last_steps = torch.cat(x0_last_steps, dim=0)
     #torch.save(concatenated_x0_last_steps, f'CGN/x0_last_steps_CGN-J-{back_coeff}-{K_x}.pth')
-    # 保存ux
-    torch.save(energy, f'CGN/energy_CGN-J-{back_coeff}-{K_x}.pt')
-    torch.save(acceptance_numbers, f'CGN/acceptance_numbers_CGN-J-{back_coeff}-{K_x}.pt')
+    torch.save(energy, f'data/energy_CGN-J-{back_coeff}-{K_x}.pt')
+    torch.save(acceptance_numbers, f'data/acceptance_numbers_CGN-J-{back_coeff}-{K_x}.pt')
+    clean_up()
 
      
 

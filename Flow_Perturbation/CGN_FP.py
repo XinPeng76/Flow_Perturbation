@@ -2,12 +2,12 @@ import torch
 import os
 from bgmol.datasets import ChignolinOBC2PT
 import numpy as np
-from train_model import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
-from src.modules.DDPM import interpolate_parameters
+from train_model_CGN import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
+from src.DDPM import interpolate_parameters
 from utils import DDPMSamplerCOM
-from src.modules.components.common import MLP,  MLP_var
-from train_Var import (n_dimensions, n_particles, ndim, back_coeff,time_forward, time_backward)
-from src.utils.common import remove_mean, modify_samples_torch_batched_K
+from src.common import MLP,  MLP_var
+from train_Var_CGN import (n_dimensions, n_particles, ndim, back_coeff,time_forward, time_backward)
+from src.utils import remove_mean, modify_samples_torch_batched_K,clean_up
 
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -16,7 +16,7 @@ dataset = ChignolinOBC2PT(download=not is_data_here, read=True)
 
 system = dataset.system
 
-model = MLP(hidden_size=2048,hidden_layers=12).to(device)			# 输出维度是2，输入是x和step
+model = MLP(ndim=ndim,hidden_size=2048,hidden_layers=12).to(device)	
 if os.path.exists('models/CGN/model_RotAug_LowLR.pth'):			
     model.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR.pth'))
 else:
@@ -29,7 +29,7 @@ Sampler = DDPMSamplerCOM(model, st, st_derivative, sigma_t_derivative, n_particl
 ddpm_ode_heun = Sampler.exact_dynamics_heun
 target_energy = dataset.get_energy_model(n_simulation_steps=0)
 
-model_var = MLP_var().to(device)
+model_var = MLP_var(ndim=ndim).to(device)
 if os.path.exists('models/CGN/model_RotAug_LowLR_Var_{}.pth'.format(back_coeff)):
     model_var.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR_Var_{}.pth'.format(back_coeff)))
 else:
@@ -63,22 +63,24 @@ if __name__ == '__main__':
     eps_init = remove_mean(eps_init, n_particles, n_dimensions)
 
     log_omega_init, x0_init, ux_init = get_log_omega(xT_init, eps_init)
-    samples_selected = ux_init < 20000
+    print(ux_init.min())
+    samples_selected = ux_init < 2000
     xT = xT_init[samples_selected].clone()
     eps = eps_init[samples_selected].clone()
     x0 = x0_init[samples_selected].clone()
     log_omega = log_omega_init[samples_selected].clone()
     ux = ux_init[samples_selected].clone()
+    print(xT.shape)
 
-    nmcmc = 20000 # number of MCMC steps
+    nmcmc = 60000 # number of MCMC steps
 
     log_omega_last_steps = []  # List to store the log_omega of the last 100 steps every 10 steps
     x0_last_steps = []  # List to store the x0 of the last 100 steps every 10 steps
     weights_xT = torch.ones_like(xT, dtype=float).to(device)
     weights_eps = torch.ones_like(eps, dtype=float).to(device)
     energy = []
-    K_x = 5
-    K_eps = 5
+    K_x = 1
+    K_eps = 1
     #print(xT)
     #print(log_omega)
     for i in range(nmcmc):
@@ -135,6 +137,8 @@ if __name__ == '__main__':
     concatenated_x0_last_steps = torch.cat(x0_last_steps, dim=0)
     torch.save(concatenated_x0_last_steps, f'data/x0_last_steps_CGN-FP-{back_coeff}-{K_x}-{K_eps}.pth')
     torch.save(energy, f'data/energy_CGN-FP-{back_coeff}-{K_x}-{K_eps}.pt')
+    print("sava")
+    clean_up()
 
 
 

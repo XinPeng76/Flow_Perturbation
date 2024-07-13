@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-def calc_alphas_betas(num_steps=1000, scaling=10, beta_min=1e-6, beta_max=1e-3):
+def calc_alphas_betas(num_steps=1000, scaling=10, beta_min=1e-5, beta_max=1e-2):
     '''
     Calculate the alpha and beta values for Denoising Diffusion Probabilistic Models (DDPM).
 
@@ -61,6 +61,7 @@ def diffusion_loss_fn(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_
     # Create the noisy data by combining the original data with the noise.
     x = x_0 * a + e * aml
     # Predict the noise for the noisy data at the selected timesteps.
+    t = t.to(device)
     output = model(x, t.squeeze(-1))
     # Calculate the mean squared error loss.
     return (e - output).square().mean()

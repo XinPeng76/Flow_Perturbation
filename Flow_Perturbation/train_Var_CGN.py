@@ -1,21 +1,22 @@
 import torch
 import numpy as np
 import os
-from src.modules.components.common import MLP,  MLP_var
-from src.utils.common import remove_mean, generate_tsampling
-from train_model import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
-from src.modules.DDPM import interpolate_parameters
+from src.common import MLP,  MLP_var
+from src.utils import remove_mean, generate_tsampling
+from train_model_CGN import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
+from src.DDPM import interpolate_parameters
 from utils import DDPMSamplerCOM
 
 back_coeff = 0.001
-model = MLP().to(device)
+model = MLP(ndim=ndim).to(device)
 if os.path.exists('models/CGN/model_RotAug_LowLR.pth'):			
     model.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR.pth'))
 else:
     OSError('No model found, please train the model first!')
 
 model.eval()
-
+for param in model.parameters():
+    param.requires_grad = False
 st, sigma_t, st_derivative, sigma_t_derivative = interpolate_parameters(num_steps, alphas_prod)
 
 Sampler = DDPMSamplerCOM(model, st, st_derivative, sigma_t_derivative, n_particles, n_dimensions, device)
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     dataloader = DataLoader(dataset,batch_size=batch_size,shuffle=True, drop_last=True)
 
     # Create the model
-    model_var = MLP_var().to(device)
+    model_var = MLP_var(ndim=ndim).to(device)
 
     num_epoch = 300
     optimizer = torch.optim.Adam(model_var.parameters(),lr=1e-3)

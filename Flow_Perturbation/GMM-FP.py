@@ -3,25 +3,28 @@ import numpy as np
 import torch
 import torch.nn as nn
 import os
-from train_model import ndim,device,Nwellinfo,sig_data
-from train_Var import back_coeff,epsilon,tmax
-from src.modules.components.common import MLP_nonorm,  MLP_var
+from train_model_GMM import ndim,device,Nwellinfo,sig_data
+from train_Var_GMM import back_coeff,epsilon,tmax
+from src.common import MLP_nonorm,  MLP_var
 from utils import EMDSampler, get_energy_device
-from src.utils.common import modify_samples_torch_batched_K
+from src.utils import modify_samples_torch_batched_K
 
-model = MLP_nonorm(hidden_size= 2000, hidden_layers= 10, emb_size= 80).to(device)  # this is F(x, t)
-if os.path.exists(f'models/EMD/{ndim}-d-model.pth'):			
-    model.load_state_dict(torch.load(f'models/EMD/{ndim}-d-model.pth'))
+model = MLP_nonorm(ndim=ndim,hidden_size= 2000, hidden_layers= 10, emb_size= 80).to(device)  # this is F(x, t)
+if os.path.exists(f'models/GMM/{ndim}-d-model.pth'):			
+    model.load_state_dict(torch.load(f'models/GMM/{ndim}-d-model.pth'))
 else:
     OSError('No model found, please train the model first!')
 model.eval()
+for param in model.parameters():
+    param.requires_grad = False
 # Create the model
-model_var = MLP_var().to(device)
+model_var = MLP_var(ndim=ndim).to(device)
 model_var.load_state_dict(torch.load('models/GMM/model_var_{}.pt'.format(back_coeff)))
 model_var.eval()
+for param in model_var.parameters():
+    param.requires_grad = False
 
-
-Sampler = EMDSampler(model, Nwellinfo, sig_data, device)
+Sampler = EMDSampler(model, sig_data, device)
 
 exact_dynamics_heun = Sampler.exact_dynamics_heun
 
@@ -59,14 +62,13 @@ if __name__ == '__main__':
     log_omega = log_omega_init.clone()
     ux = ux_init.clone()
 
-    nmcmc = 10000 # number of MCMC steps
+    nmcmc = 4000 # number of MCMC steps
 
     log_omega_last_steps = []  # List to store the log_omega of the last 100 steps every 10 steps
     x0_last_steps = []  # List to store the x0 of the last 100 steps every 10 steps
     weights_xT = torch.ones_like(xT, dtype=float).to(device)
     weights_eps = torch.ones_like(eps, dtype=float).to(device)
-    # 保存每步能量的变化
-    energy_diff = []
+    energy = []
     #print(xT)
     #print(log_omega)
     K_x = 5
@@ -97,7 +99,7 @@ if __name__ == '__main__':
         x0[index_move] = x0_new[index_move]
         ux[index_move] = ux_new[index_move]
         print(i,ux.mean(),index_move.sum())
-        energy_diff.append(ux.mean().cpu())
+        energy.append(ux.mean().cpu())
         #print(xT)
         #print(index_move)
         #print(log_omega)
@@ -125,6 +127,6 @@ if __name__ == '__main__':
 
     concatenated_x0_last_steps = torch.cat(x0_last_steps, dim=0)
     torch.save(concatenated_x0_last_steps, f'NWell_MCMC1000/x0_last_steps_GMM-1000-u-{back_coeff}-{K_x}-{K_eps}.pth')
-    torch.save(energy_diff, f'NWell_MCMC1000/energy_GMM-1000-u-{back_coeff}-{K_x}-{K_eps}.pt')
+    torch.save(energy, f'NWell_MCMC1000/energy_GMM-1000-u-{back_coeff}-{K_x}-{K_eps}.pt')
 
 

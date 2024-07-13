@@ -2,12 +2,12 @@ import torch
 import os
 from bgmol.datasets import ChignolinOBC2PT
 import numpy as np
-from train_model import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
-from src.modules.DDPM import interpolate_parameters
+from train_model_CGN import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
+from src.DDPM import interpolate_parameters
 from utils import DDPMSamplerCOM
-from src.modules.components.common import MLP
-from train_Var import (n_dimensions, n_particles, ndim, back_coeff,time_forward)
-from src.utils.common import remove_mean, modify_samples_torch_batched_K
+from src.common import MLP
+from train_Var_CGN import (n_dimensions, n_particles, ndim, back_coeff,time_forward)
+from src.utils import remove_mean, modify_samples_torch_batched_K,clean_up
 
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -16,7 +16,7 @@ dataset = ChignolinOBC2PT(download=not is_data_here, read=True)
 
 system = dataset.system
 
-model = MLP(hidden_size=2048,hidden_layers=12).to(device)			# 输出维度是2，输入是x和step
+model = MLP(ndim=ndim,hidden_size=2048,hidden_layers=12).to(device)		
 if os.path.exists('models/CGN/model_RotAug_LowLR.pth'):			
     model.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR.pth'))
 else:
@@ -31,9 +31,6 @@ target_energy = dataset.get_energy_model(n_simulation_steps=0)
 
 
 for param in model.parameters():
-    param.requires_grad = False
-
-for param in model_var.parameters():
     param.requires_grad = False
 
 def score_function_rearange(t, x):
@@ -179,5 +176,6 @@ if __name__ == '__main__':
     concatenated_x0_last_steps = torch.cat(x0_last_steps, dim=0)
     torch.save(concatenated_x0_last_steps, f'data/x0_last_steps_CGN-Hutch10-{back_coeff}-{K_x}.pth')
     torch.save(energy, f'data/energy_CGN-Hutch10-{back_coeff}-{K_x}.pt')
+    clean_up()
 
 

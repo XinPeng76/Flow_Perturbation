@@ -1,5 +1,15 @@
 import torch
 import numpy as np
+import multiprocessing
+import os
+import psutil  # pip install psutil
+
+def clean_up():
+    current_process = psutil.Process(os.getpid())
+    for child in current_process.children(recursive=True):
+        child.terminate()
+    
+    print("All relevant processes terminated")
 
 def remove_mean(samples, n_particles, n_dimensions):
     """
@@ -35,7 +45,6 @@ def modify_samples_torch_batched_K(x, weights, mean=0.0, std=1.0, K=1):
     
     Parameters:
     - x: A PyTorch tensor of shape (nbatch, ndim).
-    - weights: A tensor of shape (ndim,) representing the probability of each dimension being picked.
     - mean: The mean of the Gaussian distribution.
     - std: The standard deviation of the Gaussian distribution.
     - K: The number of dimensions to modify.
@@ -44,17 +53,17 @@ def modify_samples_torch_batched_K(x, weights, mean=0.0, std=1.0, K=1):
     - A PyTorch tensor with modified samples.
     """
     nbatch, ndim = x.size()
-    # Ensure weights are normalized and the right shape
-    weights = weights / weights.sum()
-    # Randomly choose K dimensions for each sample without replacement, considering the weights
-    random_dims = torch.multinomial(weights, K * nbatch, replacement=False).view(nbatch, K)
+    device = x.device
+    #random_dims = torch.argsort(torch.rand(nbatch, ndim), dim=1)[:, :K]
+    random_dims = torch.multinomial(weights, K)
+    # print(random_dims)
     # Generate Gaussian random variables for each sample
-    random_values = torch.normal(mean, std, (nbatch, K))
+    random_values = torch.normal(mean, std, (nbatch, K)).to(device)
     # Create a tensor of indices for batch indexing
-    batch_indices = torch.arange(nbatch).unsqueeze(1)
+    batch_indices = torch.arange(nbatch)
     # Modify the selected dimensions for each sample
-    x[batch_indices, random_dims] = random_values
-    return x
+    x[batch_indices[:, None], random_dims] = random_values
+    return
 
 def generate_tsampling(epsilon, tmax, Nselected, rho):
     """

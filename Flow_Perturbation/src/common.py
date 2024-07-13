@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from positional_embeddings import PositionalEmbedding
+from .positional_embeddings import PositionalEmbedding
 
 class Block(nn.Module):
     def __init__(self, size: int):

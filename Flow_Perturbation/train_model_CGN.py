@@ -4,9 +4,9 @@ from bgmol.datasets import ChignolinOBC2PT
 import numpy as np
 import torch.nn as nn
 from scipy.spatial.transform import Rotation as R
-from src.modules.components.common import MLP
-from src.utils.common import remove_mean
-from src.modules.DDPM import calc_alphas_betas, diffusion_loss_fn
+from src.common import MLP
+from src.utils import remove_mean
+from src.DDPM import calc_alphas_betas, diffusion_loss_fn
 
 
 # Constants
@@ -29,12 +29,11 @@ dataset1 = torch.tensor(all_data).float()
 dataset1 = remove_mean(dataset1,n_particles, n_dimensions)
 
 num_steps = 1000
-alphas, betas, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt = calc_alphas_betas(num_steps=num_steps, scaling=10, beta_min=1e-6, beta_max=1e-3)
+alphas, betas, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt = calc_alphas_betas(num_steps=num_steps, scaling=10, beta_min=1e-5, beta_max=1e-2)
 
 if __name__ == '__main__':
     if not os.path.exists('models/CGN'):
         os.makedirs('models/CGN')
-    # 开始训练模型
     seed = 1234
     print('Training model...')
     batch_size = 256
@@ -42,9 +41,10 @@ if __name__ == '__main__':
     print(dataset1.shape)
     dataloader = torch.utils.data.DataLoader(dataset1,batch_size=batch_size,shuffle=True)
 
-    model = MLP().to(device)			
-    num_epoch = 2001
-    optimizer = torch.optim.Adam(model.parameters(),lr=2e-4)
+    model = MLP(ndim = ndim).to(device)	
+    #model.load_state_dict(torch.load('models/CGN/model_RotAug_LowLR.pth'))		
+    num_epoch = 4001
+    optimizer = torch.optim.Adam(model.parameters(),lr=1e-3)
     def random_rotation_matrix():
         rotation = R.random()
         matrix = rotation.as_matrix()
@@ -66,17 +66,17 @@ if __name__ == '__main__':
             loss = diffusion_loss_fn(model, batch_x, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, num_steps)
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)	
+            #torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)	
             optimizer.step()
             loss_list.append(loss.item())
         if(t%50==0):	
             print(np.mean(loss_list))
-        if(t%200==0):
+        if(t%500==0):
             for param_group in optimizer.param_groups:
                 param_group['lr'] *= 0.5
                 param_group['lr'] = max(param_group['lr'], 1e-6)
             print('lr*0.5')
-            torch.save(model.state_dict(), 'models/CGN/model_RotAug_LowLR.pth_{}.pth'.format(t//100))
+            torch.save(model.state_dict(), 'models/CGN/model_RotAug_LowLR_{}.pth'.format(t//100))
         
-    torch.save(model.state_dict(), 'models/CGN/model_RotAug_LowLR.pth.pth')
+    torch.save(model.state_dict(), 'models/CGN/model_RotAug_LowLR.pth')
 
