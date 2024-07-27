@@ -20,13 +20,13 @@ Citation update is coming up...
 }
 ```
 ***
-## [Dependencies](#dependencies)
+# Dependencies
 * Mandatory
   * [pytorch>=2.0](https://github.com/pytorch/pytorch)
   * [numpy](https://github.com/numpy/numpy)
   * [bgmol](https://github.com/noegroup/bgmol) (for  Chignolin)
   * [bgflow](https://github.com/noegroup/bgmol) (for  Chignolin)
-  * [mdtraj](https://github.com/mdtraj/mdtraj) (for  Chignolin)
+  * [mdtraj=1.9.9](https://github.com/mdtraj/mdtraj) (for  Chignolin)
 
 # Examples
 * Use the example in the paper
