@@ -26,6 +26,7 @@ Citation update is coming up...
   * [numpy](https://github.com/numpy/numpy)
   * [bgmol](https://github.com/noegroup/bgmol) (for some example notebooks)
   * [bgflow](https://github.com/noegroup/bgmol) (for some example notebooks)
+  * [mdtraj](https://github.com/mdtraj/mdtraj)(for  Chignolin)
 
 # Examples
 * Use the example in the paper
