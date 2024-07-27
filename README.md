@@ -24,6 +24,39 @@ Citation update is coming up...
 * Mandatory
   * [pytorch>=2.0](https://github.com/pytorch/pytorch)
   * [numpy](https://github.com/numpy/numpy)
-  * [bgmol](https://github.com/noegroup/bgmol) (for  Chignolin)
-  * [bgflow](https://github.com/noegroup/bgflow) (for  Chignolin)
-  * [mdtraj](https://github.com/mdtraj/mdtraj)(for  Chignolin)
+  * [bgmol](https://github.com/noegroup/bgmol) (for some example notebooks)
+  * [bgflow](https://github.com/noegroup/bgmol) (for some example notebooks)
+
+# Examples
+* Use the example in the paper
+'''
+Flow_Perturbation
+|___GMM # Gaussian Mixture Model
+|   |___train_model_GMM.py # Train the Flow model
+|   |__train_Var_GMM.py # Train the Flow Perturbation var model
+|   |___GMM_FP.py # Flow Perturbation
+|   |___GMM_H1.py # Hutchinson estimator
+|   |___GMM_H10.py # 10 Hutchinson estimator
+|   |___GMM_J1.py # Jacobian
+|   
+|___Chignolin
+|   |___train_model_CGN.py # Train the Flow model
+|   |__train_Var_CGN.py # Train the Flow Perturbation var model
+|   |___Chignolin_FP.py # Flow Perturbation
+|   |___Chignolin_H1.py # Hutchinson estimator
+|   |___Chignolin_H10.py # 10 Hutchinson estimator
+|   |___Chignolin_J1.py # Jacobian
+|   
+...
+'''
+* Use the example in jupyter notebook
+  * [snf](https://github.com/noegroup/stochastic_normalizing_flows)
+'''
+image_dog.ipynb
+image_dog_DDPm.ipynb
+GMM_50D.ipynb
+GMM50D_DDPM.ipynb
+'''
+***
+## [License](#dependencies)
+[MIT License](LICENSE)
