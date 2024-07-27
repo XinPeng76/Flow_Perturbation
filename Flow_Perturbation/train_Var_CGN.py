@@ -4,8 +4,9 @@ import os
 from src.common import MLP,  MLP_var
 from src.utils import remove_mean, generate_tsampling
 from train_model_CGN import alphas_prod,n_dimensions,n_particles,ndim,device,num_steps
-from src.DDPM import interpolate_parameters
-from utils import DDPMSamplerCOM
+from src.DDPM import interpolate_parameters,DDPMSamplerCoM
+from torch.utils.data import DataLoader
+from src.train import train_model_var, CustomDataset
 
 back_coeff = 0.001
 model = MLP(ndim=ndim).to(device)
@@ -19,7 +20,7 @@ for param in model.parameters():
     param.requires_grad = False
 st, sigma_t, st_derivative, sigma_t_derivative = interpolate_parameters(num_steps, alphas_prod)
 
-Sampler = DDPMSamplerCOM(model, st, st_derivative, sigma_t_derivative, n_particles, n_dimensions, device)
+Sampler = DDPMSamplerCoM(model, st, st_derivative, sigma_t_derivative, n_particles, n_dimensions, device)
 
 ddpm_ode_heun = Sampler.exact_dynamics_heun
 
@@ -49,22 +50,9 @@ if __name__ == '__main__':
         dxT_list.append(dxT.cpu())
         eps_squarenorm_list.append(eps_squarenorm.cpu())
 
-    x0 = torch.cat(x0_list)
-    dxT = torch.cat(dxT_list)
-    eps_squarenorm = torch.cat(eps_squarenorm_list)
-
-    from torch.utils.data import Dataset, DataLoader
-    class CustomDataset(Dataset):
-        def __init__(self, features, labels1, labels2):
-            self.features = features
-            self.labels1 = labels1
-            self.labels2 = labels2
-        
-        def __getitem__(self, index):
-            return self.features[index], self.labels1[index], self.labels2[index]
-        
-        def __len__(self):
-            return len(self.features)
+    x0 = torch.cat(x0_list).to(device)
+    dxT = torch.cat(dxT_list).to(device)
+    eps_squarenorm = torch.cat(eps_squarenorm_list).to(device)
 
     batch_size = 128
     dataset = CustomDataset(x0, dxT, eps_squarenorm)
@@ -72,35 +60,4 @@ if __name__ == '__main__':
 
     # Create the model
     model_var = MLP_var(ndim=ndim).to(device)
-
-    num_epoch = 300
-    optimizer = torch.optim.Adam(model_var.parameters(),lr=1e-3)
-
-    for t in range(num_epoch):
-        loss_list = []
-        for idx,(x0_i, dxT_i,  eps_squarenorm_i) in enumerate(dataloader):
-            x0_i = x0_i.to(device)
-            dxT_i = dxT_i.to(device)
-            eps_squarenorm_i = eps_squarenorm_i.to(device)
-            #print(x0_i.dtype)
-            forw_coeff = model_var(x0_i)
-            #print(forw_coeff)
-            #print(forw_coeff.shape)
-            eps_tilde = dxT_i / forw_coeff
-            #print(eps_tilde)
-            eps_tilde_square_norm = torch.sum(eps_tilde**2, dim=-1)
-
-            loss = torch.mean(torch.abs(eps_tilde_square_norm - eps_squarenorm_i))
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            loss_list.append(loss.item())
-        print(t,np.mean(loss_list))
-        
-        
-        if(t%50==0):
-            for param_group in optimizer.param_groups:
-                param_group['lr'] *= 0.5			
-            print(np.mean(loss_list))
-
-    torch.save(model_var.state_dict(), 'models/CGN/model_RotAug_LowLR_Var_{}.pth'.format(back_coeff))
+    model_var = train_model_var(model_var, dataloader, back_coeff, num_epoch=301,lr=1e-3,path='models/CGN',decay_steps = 100)

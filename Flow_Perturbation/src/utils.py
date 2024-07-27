@@ -1,15 +1,20 @@
 import torch
 import numpy as np
-import multiprocessing
 import os
 import psutil  # pip install psutil
 
 def clean_up():
-    current_process = psutil.Process(os.getpid())
-    for child in current_process.children(recursive=True):
-        child.terminate()
+    """
+    Terminates all child processes of the current process.
+
+    Uses the psutil library to get an instance of the current process, then iterates over and terminates all child processes.
+    Finally, prints a message confirming all relevant processes have been terminated.
+    """
+    current_process = psutil.Process(os.getpid())  # Get an instance of the current process
+    for child in current_process.children(recursive=True):  # Iterate over all child processes
+        child.terminate()  # Terminate the child process
     
-    print("All relevant processes terminated")
+    print("All relevant processes terminated")  # Print termination confirmation message
 
 def remove_mean(samples, n_particles, n_dimensions):
     """
