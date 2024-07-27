@@ -8,7 +8,7 @@ Jacobian calculations and the Hutchinson estimator.
 Publication
 -----------
 Please find the arxiv preprint here:
-https://arxiv.org/abs/2002.06707
+[https://arxiv.org/abs/2002.06707](https://arxiv.org/abs/2407.10666)
 
 Citation update is coming up...
 ```
