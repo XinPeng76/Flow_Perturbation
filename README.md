@@ -29,7 +29,8 @@ Citation update is coming up...
 
 # Examples
 * Use the example in the paper
-'''
+* 
+```
 Flow_Perturbation
 |___GMM # Gaussian Mixture Model
 |   |___train_model_GMM.py # Train the Flow model
@@ -48,15 +49,15 @@ Flow_Perturbation
 |   |___Chignolin_J1.py # Jacobian
 |   
 ...
-'''
+```
 * Use the example in jupyter notebook
   * [snf](https://github.com/noegroup/stochastic_normalizing_flows)
-'''
+```
 image_dog.ipynb
 image_dog_DDPm.ipynb
 GMM_50D.ipynb
 GMM50D_DDPM.ipynb
-'''
+```
 ***
 ## [License](#dependencies)
 [MIT License](LICENSE)
