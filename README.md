@@ -30,7 +30,6 @@ Citation update is coming up...
 
 # Examples
 * Use the example in the paper
-* 
 ```
 Flow_Perturbation
 |___GMM # Gaussian Mixture Model
