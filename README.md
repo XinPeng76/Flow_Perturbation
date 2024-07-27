@@ -38,15 +38,15 @@ Flow_Perturbation
 |   |___GMM_FP.py # Flow Perturbation
 |   |___GMM_H1.py # Hutchinson estimator
 |   |___GMM_H10.py # 10 Hutchinson estimator
-|   |___GMM_J1.py # Jacobian
+|   |___GMM_J.py # Jacobian
 |   
 |___Chignolin
 |   |___train_model_CGN.py # Train the Flow model
 |   |__train_Var_CGN.py # Train the Flow Perturbation var model
-|   |___Chignolin_FP.py # Flow Perturbation
-|   |___Chignolin_H1.py # Hutchinson estimator
-|   |___Chignolin_H10.py # 10 Hutchinson estimator
-|   |___Chignolin_J1.py # Jacobian
+|   |___CGN_FP.py # Flow Perturbation
+|   |___CGN_H1.py # Hutchinson estimator
+|   |___CGN_H10.py # 10 Hutchinson estimator
+|   |___CGN_J.py # Jacobian
 |   
 ...
 ```
