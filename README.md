@@ -30,18 +30,22 @@ Citation update is coming up...
 
 # Training
 * All hyper-parameters and training details are provided in config files (), and free feel to tune these parameters../configs/*.yml
+  
 ```
 python train.py ./configs/GMM10D_default.yml ./models/GMM10D
 python train.py ./configs/GMM1000D_default.yml ./models/GMM1000D
 python train.py ./configs/CGN_default.yml ./models/CGN
 ...
+
 The model checkpoints will be saved in the specified directory,e.g., ./models/GMM10D
 
 # Metropolis Monte Carlo (MC) simulations
 * The Metropolis MC simulations are provided in the following files:
+
 ```
 python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher
 ```
+
 The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
 0: Flow Perturbation (FP)
 -1: Jacobian-based method
@@ -50,6 +54,7 @@ The first argument specifies the configuration file, while the second argument i
 The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 # Sequential Monte Carlo (SMC)
+
 '''
 python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type Rademacher
 python SMC.py ./configs/GMM1000D_default.yml ./models/GMM1000D --method 0 --eps_type Rademacher
