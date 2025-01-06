@@ -28,36 +28,45 @@ Citation update is coming up...
   * [bgflow](https://github.com/noegroup/bgmol) (for  Chignolin)
   * [mdtraj=1.9.9](https://github.com/mdtraj/mdtraj) (for  Chignolin)
 
-# Examples
-* Use the example in the paper
+# Training
+* All hyper-parameters and training details are provided in config files (), and free feel to tune these parameters../configs/*.yml
 ```
-Flow_Perturbation
-|___GMM # Gaussian Mixture Model
-|   |___train_model_GMM.py # Train the Flow model
-|   |__train_Var_GMM.py # Train the Flow Perturbation var model
-|   |___GMM_FP.py # Flow Perturbation
-|   |___GMM_H1.py # Hutchinson estimator
-|   |___GMM_H10.py # 10 Hutchinson estimator
-|   |___GMM_J.py # Jacobian
-|   
-|___Chignolin
-|   |___train_model_CGN.py # Train the Flow model
-|   |__train_Var_CGN.py # Train the Flow Perturbation var model
-|   |___CGN_FP.py # Flow Perturbation
-|   |___CGN_H1.py # Hutchinson estimator
-|   |___CGN_H10.py # 10 Hutchinson estimator
-|   |___CGN_J.py # Jacobian
-|   
+python train.py ./configs/GMM10D_default.yml ./models/GMM10D
+python train.py ./configs/GMM1000D_default.yml ./models/GMM1000D
+python train.py ./configs/CGN_default.yml ./models/CGN
 ...
+The model checkpoints will be saved in the specified directory,e.g., ./models/GMM10D
 ```
-* Use the example in jupyter notebook
-  * [snf](https://github.com/noegroup/stochastic_normalizing_flows)
+# Metropolis Monte Carlo (MC) simulations
+* The Metropolis MC simulations are provided in the following files:
 ```
-image_dog.ipynb
-image_dog_DDPm.ipynb
-GMM_50D.ipynb
-GMM50D_DDPM.ipynb
+python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher
 ```
-***
+The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
+0: Flow Perturbation (FP)
+-1: Jacobian-based method
+-2: Stochastic Normalizing Flow (SNF)
+1-n: Hutchinson trace estimator
+The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
+
+# Sequential Monte Carlo (SMC)
+'''
+python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type Rademacher
+python SMC.py ./configs/GMM1000D_default.yml ./models/GMM1000D --method 0 --eps_type Rademacher
+python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher
+'''
+The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
+0: Flow Perturbation (FP)
+-1: Jacobian-based method
+-2: Stochastic Normalizing Flow (SNF)
+1-n: Hutchinson trace estimator
+The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
+
+
+# Model and data
+* We provide all pre-trained model checkpoints and the result datasets presented in the paper. The resources are hosted on Hugging Face:
+  * [Result Folder](https://huggingface.co/XinPeng76/Flow_Perturbation)
+
+
 ## [License](#dependencies)
 [MIT License](LICENSE)
