@@ -68,9 +68,11 @@ python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radem
 - `--eps_type` parameter: Defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 
-## Model and data
-* We provide all pre-trained model checkpoints and the result datasets presented in the paper. The resources are hosted on Hugging Face:
-  * [Result Folder](https://huggingface.co/XinPeng76/Flow_Perturbation)
+## Model and Data
+* The result datasets presented in the paper can be found in the `Result` folder of this repository.
+
+* We provide all pre-trained model checkpoints as well as other result datasets from the paper. These resources are hosted on Hugging Face:
+  * [Model and Result Folder](https://huggingface.co/XinPeng76/Flow_Perturbation)
 
 
 ## [License](#dependencies)
