@@ -45,7 +45,7 @@ python train.py ./configs/CGN_default.yml ./models/CGN\
 ```bash
 python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher\ 
 ```
-```
+
 * The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
 0: Flow Perturbation (FP)
 -1: Jacobian-based method
