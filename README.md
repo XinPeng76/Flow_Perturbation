@@ -35,8 +35,7 @@ Citation update is coming up...
 python train.py ./configs/GMM10D_default.yml ./models/GMM10D
 python train.py ./configs/GMM1000D_default.yml ./models/GMM1000D
 python train.py ./configs/CGN_default.yml ./models/CGN
-...
-...
+```
 
 * The model checkpoints will be saved in the specified directory,e.g., ./models/GMM10D
 
@@ -60,7 +59,6 @@ python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radema
 python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type Rademacher
 python SMC.py ./configs/GMM1000D_default.yml ./models/GMM1000D --method 0 --eps_type Rademacher
 python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher
-'''
 ```
 * The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
  - `0`: Flow Perturbation (FP)
