@@ -37,6 +37,7 @@ python train.py ./configs/GMM1000D_default.yml ./models/GMM1000D
 python train.py ./configs/CGN_default.yml ./models/CGN
 ...
 ...
+
 * The model checkpoints will be saved in the specified directory,e.g., ./models/GMM10D
 
 ## Metropolis Monte Carlo (MC) simulations
