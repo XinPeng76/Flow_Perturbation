@@ -47,11 +47,11 @@ python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radema
 ```
 
 * The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
-0: Flow Perturbation (FP)
--1: Jacobian-based method
--2: Stochastic Normalizing Flow (SNF)
-1-n: Hutchinson trace estimator
-The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
+ - `0`: Flow Perturbation (FP)
+  - `-1`: Jacobian-based method
+  - `-2`: Stochastic Normalizing Flow (SNF)
+  - `1-n`: Hutchinson trace estimator
+- `--eps_type` parameter: Defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 ## Sequential Monte Carlo (SMC)
 
@@ -62,11 +62,11 @@ python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radem
 '''
 ```
 * The first argument specifies the configuration file, while the second argument indicates the model directory. The --method option determines the approach for running the Monte Carlo (MC) simulations:
-0: Flow Perturbation (FP)
--1: Jacobian-based method
--2: Stochastic Normalizing Flow (SNF)
-1-n: Hutchinson trace estimator
-The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
+ - `0`: Flow Perturbation (FP)
+  - `-1`: Jacobian-based method
+  - `-2`: Stochastic Normalizing Flow (SNF)
+  - `1-n`: Hutchinson trace estimator
+- `--eps_type` parameter: Defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 
 ## Model and data
