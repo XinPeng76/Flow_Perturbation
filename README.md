@@ -28,7 +28,7 @@ Citation update is coming up...
   * [bgflow](https://github.com/noegroup/bgmol) (for  Chignolin)
   * [mdtraj=1.9.9](https://github.com/mdtraj/mdtraj) (for  Chignolin)
 
-# Training
+## Training
 * All hyper-parameters and training details are provided in config files (), and free feel to tune these parameters../configs/*.yml
   
 ```bash
@@ -53,7 +53,7 @@ python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radema
 1-n: Hutchinson trace estimator
 The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
-# Sequential Monte Carlo (SMC)
+## Sequential Monte Carlo (SMC)
 
 ```bash
 python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type Rademacher\ 
@@ -69,7 +69,7 @@ python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radem
 The --eps_type parameter defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 
-# Model and data
+## Model and data
 * We provide all pre-trained model checkpoints and the result datasets presented in the paper. The resources are hosted on Hugging Face:
   * [Result Folder](https://huggingface.co/XinPeng76/Flow_Perturbation)
 
