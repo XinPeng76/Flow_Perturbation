@@ -36,10 +36,10 @@ python train.py ./configs/GMM10D_default.yml ./models/GMM10D
 python train.py ./configs/GMM1000D_default.yml ./models/GMM1000D
 python train.py ./configs/CGN_default.yml ./models/CGN
 ...
-
+...
 * The model checkpoints will be saved in the specified directory,e.g., ./models/GMM10D
 
-# Metropolis Monte Carlo (MC) simulations
+## Metropolis Monte Carlo (MC) simulations
 * The Metropolis MC simulations are provided in the following files:
 
 ```bash
@@ -54,7 +54,7 @@ python MC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radema
 - `--eps_type` parameter: Defines the type of perturbation to use, such as Rademacher, Gaussian, etc.
 
 ## Sequential Monte Carlo (SMC)
-
+* The Sequential Monte Carlo in the following files:
 ```bash
 python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type Rademacher
 python SMC.py ./configs/GMM1000D_default.yml ./models/GMM1000D --method 0 --eps_type Rademacher
