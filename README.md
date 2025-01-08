@@ -60,7 +60,7 @@ python SMC.py ./configs/GMM10D_default.yml ./models/GMM10D --method 0 --eps_type
 python SMC.py ./configs/GMM1000D_default.yml ./models/GMM1000D --method 0 --eps_type Rademacher
 python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Rademacher
 ```
-* The first argument specifies the configuration file, while the second argument indicates the model directory. The `--method` option determines the approach for running the Monte Carlo (MC) simulations:
+* The first argument specifies the configuration file, while the second argument indicates the model directory. The `--method` option determines the approach for running the Sequential Monte Carlo (SMC) simulations:
  - `0`: Flow Perturbation (FP)
   - `-1`: Jacobian-based method
   - `-2`: Stochastic Normalizing Flow (SNF)
