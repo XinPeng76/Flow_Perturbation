@@ -3,12 +3,12 @@ We introduce the flow perturbation method, which incorporates optimized stochast
 unbiased sampling of the Boltzmann distribution with orders of magnitude speedup compared to both brute force
 Jacobian calculations and the Hutchinson estimator. 
 
-![Flow Perturbation](./data/ODE_pf.png "Title")
+![Flow Perturbation](./figures/ODE_pf.png "Title")
 
 Publication
 -----------
 Please find the arxiv preprint here:
-[https://arxiv.org/abs/2002.06707](https://arxiv.org/abs/2407.10666)
+[https://arxiv.org/abs/2407.10666](https://arxiv.org/abs/2407.10666)
 
 Citation update is coming up...
 ```
