@@ -202,12 +202,12 @@ class DDPMSamplerCoM:
         return odesolver(self.score_function_rearange, x, t, t_next)
     
     @torch.no_grad()
-    def exact_dynamics(self, xT, timesteps): 
+    def exact_dynamics(self, xT, timesteps, method = 'RK4'): 
         xt = remove_mean(xT, self.n_particles, self.n_dimensions)
         for i in range(len(timesteps)-1):
             t = timesteps[i]
             tnext = timesteps[i+1]
-            xt = odesolver(self.score_function_rearange, xt, t, tnext)
+            xt = odesolver(self.score_function_rearange, xt, t, tnext, method)
             xt = remove_mean(xt, self.n_particles, self.n_dimensions)
         return xt
     
@@ -283,12 +283,12 @@ class DDPMSampler:
         return odesolver(self.score_function_rearange, x, t, t_next)
     
     @torch.no_grad()
-    def exact_dynamics(self, xT, timesteps): 
+    def exact_dynamics(self, xT, timesteps, method = 'RK4'): 
         xt = xT
         for i in range(len(timesteps)-1):
             t = timesteps[i]
             tnext = timesteps[i+1]
-            xt = odesolver(self.score_function_rearange, xt, t, tnext)
+            xt = odesolver(self.score_function_rearange, xt, t, tnext, method)
         return xt
     
     def exact_dynamics_dSt(self, xT, timesteps, method = 'RK4',nnoise = 1, eps_type='Rademacher'): 
