@@ -45,20 +45,20 @@ def train_model_EDM(model, device, ndim, sig_data, dataloader, path,num_epoch=81
     torch.save(model.state_dict(), f'{path}/model.pth')
     return model
 
-def train_model_DDPM(model, ndim, dataloader, path, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, num_steps,num_epoch=81,lr=1e-3, loss_DDPM = diffusion_loss_fn,decay_steps = 20):
+def train_model_DDPM(model, ndim, dataloader, path, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, 
+                     num_steps,num_epoch=81,lr=1e-3, loss_DDPM = diffusion_loss_fn,decay_steps = 20,noise_offset=0.0,opt = torch.optim.Adam,logger=None):
     if not os.path.exists(path):
         os.makedirs(path)
-    seed = 1234
     print('Training model...')
 
-    optimizer = torch.optim.Adam(model.parameters(),lr=lr)
+    optimizer = opt(model.parameters(),lr=lr)
 
     for t in range(num_epoch):
         loss_list = []
 
         for idx,batch_x in enumerate(dataloader):
             batch_x = batch_x
-            loss = loss_DDPM(model, batch_x, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, num_steps)
+            loss = loss_DDPM(model, batch_x, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, num_steps,noise_offset=noise_offset)
             optimizer.zero_grad()
             loss.backward()
             #torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)	
@@ -68,10 +68,10 @@ def train_model_DDPM(model, ndim, dataloader, path, alphas_bar_sqrt, one_minus_a
             for param_group in optimizer.param_groups:
                 param_group['lr'] *= 0.5
                 param_group['lr'] = max(param_group['lr'], 1e-5)
-            print(np.mean(loss_list))
-            print('lr*0.5')
+            logger.info(f"Epoch {t}: Loss: {np.mean(loss_list)}")
+            logger.info(f"Learning rate: {param_group['lr']}")
             torch.save(model.state_dict(), f'{path}/model_{t//100}.pth')
-        
+    logger.info(f"Final Loss: {np.mean(loss_list)}")
     torch.save(model.state_dict(), f'{path}/model.pth')
     
     return model

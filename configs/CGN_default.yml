@@ -1,37 +1,53 @@
 model:
+  type: DIT
   ndim: 525
-  nwell: 2
+  img_size: 23
   num_steps: 1000
   scaling: 10
   beta_min: 1.e-5
   beta_max: 1.e-2
-  hidden_size: 2048
-  hidden_layers: 12
-  emb_size: 10
+  patch_size: 3
+  channel: 1
+  emb_size: 64
+  dit_num: 32
+  head: 4
 
 train:
   batch_size: 256
-  num_epoch: 10001
-  decay_steps: 1000
-  if_norm: True
-  lr: 2.e-4
+  num_epoch: 5001
+  decay_steps: 500
+  lr: 1.e-3
+  noise_offset: 0.3
+  opt: torch.optim.AdamW
+  if_v: True
 
 dataset:
   name: CGN
-  MC: MC-CGN
-SMC:
-  n_steps: 15000
+
+Sampler:
   ode_steps: 20
-  mc: 50000
+  tmax: 0.65
+  rho: 3
+
+MC:
+  mc_steps: 5000
+  save_steps: 1
+  K_x: 1
+  K_eps: 1
+  beta: 1.0
+  
+SMC:
+  n_steps: 1000
   nmc: 2
-  n_replicas: 4000
-  Kmax_x: 100
-  Kmax_eps: 100
-  Kmin_x: 2
-  Kmin_eps: 2
-  compress_exp_x: 0.05
-  compress_exp_eps: 0.05
-  beta_cut: 0.01
+  n_replicas: 1000
+  Kmax_x: 20
+  Kmax_eps: 20
+  Kmin_x: 1
+  Kmin_eps: 1
+  compress_exp_x: 0.001
+  compress_exp_eps: 0.001
+  ess_threshold: 0.95
+  resample_method: kl_reshuffle
 
 
 

@@ -38,7 +38,7 @@ def calc_alphas_betas(num_steps=1000, scaling=10, beta_min=1e-5, beta_max=1e-2):
 
     return alphas, betas, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt
 
-def diffusion_loss_fn(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_steps):
+def diffusion_loss_fn(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_steps, noise_offset=0.3):
     '''
     Compute the diffusion loss for a given model and input.
 
@@ -48,6 +48,7 @@ def diffusion_loss_fn(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_
     - alphas_bar_sqrt (torch.Tensor): The square root of the cumulative product of alpha values.
     - one_minus_alphas_bar_sqrt (torch.Tensor): The square root of one minus the cumulative product of alpha values.
     - n_steps (int): The number of diffusion steps.
+    - noise_offset (float): The scale factor for offset noise (default: 0.3). When >0, an additional noise term
 
     Returns:
     - The mean squared error between the noise predicted by the model and the actual noise.
@@ -71,7 +72,7 @@ def diffusion_loss_fn(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_
     # Calculate the mean squared error loss.
     return (e - output).square().mean()
 
-def diffusion_loss_fn_v_prediction(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_steps):
+def diffusion_loss_fn_v_prediction(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_steps, noise_offset=0.3):
     '''
     Compute the diffusion loss for a v-prediction model.
 
@@ -81,6 +82,7 @@ def diffusion_loss_fn_v_prediction(model, x_0, alphas_bar_sqrt, one_minus_alphas
     - alphas_bar_sqrt (torch.Tensor): The square root of the cumulative product of alpha values.
     - one_minus_alphas_bar_sqrt (torch.Tensor): The square root of one minus the cumulative product of alpha values.
     - n_steps (int): The number of diffusion steps.
+    - noise_offset (float): The scale factor for offset noise (default: 0.3). When >0, an additional noise term
 
     Returns:
     - The mean squared error between the velocity predicted by the model and the actual velocity.
@@ -99,6 +101,9 @@ def diffusion_loss_fn_v_prediction(model, x_0, alphas_bar_sqrt, one_minus_alphas
     
     # Generate random noise.
     e = torch.randn_like(x_0).to(device)
+    if noise_offset != 0.0:
+        offset = torch.randn(x_0.shape[0], 1, device=device) * noise_offset
+        e = e + offset
     
     # Create the noisy data by combining the original data with the noise.
     x = x_0 * a + e * aml
@@ -202,12 +207,12 @@ class DDPMSamplerCoM:
         return odesolver(self.score_function_rearange, x, t, t_next)
     
     @torch.no_grad()
-    def exact_dynamics(self, xT, timesteps): 
+    def exact_dynamics(self, xT, timesteps, method = 'RK4'): 
         xt = remove_mean(xT, self.n_particles, self.n_dimensions)
         for i in range(len(timesteps)-1):
             t = timesteps[i]
             tnext = timesteps[i+1]
-            xt = odesolver(self.score_function_rearange, xt, t, tnext)
+            xt = odesolver(self.score_function_rearange, xt, t, tnext, method)
             xt = remove_mean(xt, self.n_particles, self.n_dimensions)
         return xt
     
@@ -283,12 +288,12 @@ class DDPMSampler:
         return odesolver(self.score_function_rearange, x, t, t_next)
     
     @torch.no_grad()
-    def exact_dynamics(self, xT, timesteps): 
+    def exact_dynamics(self, xT, timesteps, method = 'RK4'): 
         xt = xT
         for i in range(len(timesteps)-1):
             t = timesteps[i]
             tnext = timesteps[i+1]
-            xt = odesolver(self.score_function_rearange, xt, t, tnext)
+            xt = odesolver(self.score_function_rearange, xt, t, tnext, method)
         return xt
     
     def exact_dynamics_dSt(self, xT, timesteps, method = 'RK4',nnoise = 1, eps_type='Rademacher'): 

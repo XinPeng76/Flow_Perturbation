@@ -1,36 +1,7 @@
 import torch
 import numpy as np
 
-from torch.func import vjp, vmap, jacrev
-from functools import partial
 from .utils import remove_mean, modify_samples_torch_batched_K
-
-def get_vjp_score(xt, t, eps, score_function_rearange):
-    score, vjp_score = vjp(partial(score_function_rearange, t), xt)
-    x_grad, = vjp_score(eps)
-    return score, torch.sum(eps * x_grad, dim=-1)
-
-def get_vjp_score_mnoise(xt, t, eps, score_function_rearange):
-    score, vjp_score = vjp(partial(score_function_rearange, t), xt)
-    x_grad, = vmap(vjp_score)(eps)
-    return score, torch.mean(torch.sum(eps * x_grad, dim=-1),dim=0)
-
-def get_jacobian_score(score_function_1element):
-    jacobian_score = jacrev(score_function_1element)
-    v_jacobian_score = vmap(jacobian_score, in_dims=(0, None))
-    return v_jacobian_score
-
-def v_jacobian_score_batch(x, t, v_jacobian_score, batch_size=200):
-    nbatch = x.size(0)
-    n = nbatch // batch_size
-    scores = []
-    for i in range(n):
-        x_batch = x[i*batch_size:(i+1)*batch_size]
-        scores.append(v_jacobian_score(x_batch, t))
-    if nbatch % batch_size > 0:
-        x_batch = x[n*batch_size:]
-        scores.append(v_jacobian_score(x_batch, t))
-    return torch.cat(scores, dim=0)
 
 def save_mcmc_states(xT, log_omega, x0, ux, energy, acceptance_numbers, mc_round, path):
     # Create clones of the tensors and move them to CPU

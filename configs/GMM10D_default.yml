@@ -1,4 +1,5 @@
 model:
+  type: MLP
   ndim: 10
   nwell: 2
   num_steps: 1000
@@ -13,17 +14,21 @@ train:
   batch_size: 128
   num_epoch: 81
   decay_steps: 20
-  if_norm: False
   lr: 2.e-4
-
+  noise_offset: 0.0
+  opt: torch.optim.AdamW
+  if_v: True
+  
 dataset:
   name: GMM
-  MC: 
+
+Sampler:
+  ode_steps: 20
+  tmax: 1.0
+  rho: 2
 
 SMC:
   n_steps: 2000
-  ode_steps: 20
-  mc: 50000
   nmc: 2
   n_replicas: 1000
   Kmax_x: 10
@@ -32,7 +37,7 @@ SMC:
   Kmin_eps: 1
   compress_exp_x: 0.05
   compress_exp_eps: 0.05
-  beta_cut: 0.0
-
+  ess_threshold: 0.95
+  resample_method: systematic
 
 

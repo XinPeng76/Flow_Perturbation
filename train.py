@@ -8,13 +8,11 @@ from glob import glob
 import torch
 from Flow_Perturbation.src.GMM_distribution import get_energy_device,sample_NWell,redraw_samples,get_energy_gradient_device
 from Flow_Perturbation.src.DDPM import calc_alphas_betas, diffusion_loss_fn, diffusion_loss_fn_v_prediction
-from Flow_Perturbation.src.common import MLP_nonorm,LangevinDynamicsWithLogP,MLP
+from Flow_Perturbation.MLP_src.common import MLP_nonorm,MLP
+from Flow_Perturbation.DIT_src.dit import DiT
 from Flow_Perturbation.src.train import train_model_DDPM
 from Flow_Perturbation.src.DDPM import interpolate_parameters,DDPMSamplerCoM, DDPMSampler
-from Flow_Perturbation.src.utils import  get_new_log_dir,get_logger,remove_mean, clean_up
-from Flow_Perturbation.src.SMC import generate_doubling_intervals_exclude_start,systematic_resampling,find_closest_larger_element_desc,mc_step,resample_if_needed
-from Flow_Perturbation.src.get_log_omega import get_log_omega_FP,get_log_omega_J,get_log_omega_SNF
-import time
+from Flow_Perturbation.src.utils import  get_new_log_dir,get_logger,remove_mean, clean_up,str2obj
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -63,12 +61,27 @@ if __name__ == '__main__':
     logger = get_logger(config.dataset.name, log_dir, 'train.log')
     logger.info(args)
     logger.info(config)
+    shutil.copy(config_path, os.path.join(log_dir, os.path.basename(config_path)))
+
     alphas, betas, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt =\
           calc_alphas_betas(num_steps=config.model.num_steps, scaling=config.model.scaling, beta_min=config.model.beta_min, beta_max=config.model.beta_max)
-    if config.train.if_norm:
+    if config.model.type == 'MLP':
         model = MLP(ndim=config.model.ndim,hidden_size=config.model.hidden_size,hidden_layers=config.model.hidden_layers,emb_size=config.model.emb_size).to(args.device)
-    else:
+    elif config.model.type == 'MLP_nonorm':
         model = MLP_nonorm(ndim=config.model.ndim,hidden_size=config.model.hidden_size,hidden_layers=config.model.hidden_layers,emb_size=config.model.emb_size).to(args.device)
+    elif config.model.type == 'DIT':
+        model = DiT(img_size=config.model.img_size,patch_size=config.model.patch_size,channel=config.model.channel,emb_size=config.model.emb_size,dit_num=config.model.dit_num,head=config.model.head).to(args.device)
+    else:
+        raise ValueError('Model not implemented')
+    
+    if config.train.if_v:
+        diffusion_loss_fn = diffusion_loss_fn_v_prediction   
+    else:
+        diffusion_loss_fn = diffusion_loss_fn
+
     model = train_model_DDPM(model, config.model.ndim, dataloader, args.path, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, \
-                             config.model.num_steps,num_epoch=config.train.num_epoch,lr=config.train.lr, loss_DDPM = diffusion_loss_fn_v_prediction,decay_steps = config.train.decay_steps)
+                             config.model.num_steps,num_epoch=config.train.num_epoch,lr=config.train.lr, \
+                             loss_DDPM = diffusion_loss_fn,decay_steps = config.train.decay_steps, \
+                             noise_offset= config.train.noise_offset,opt=str2obj(config.train.opt),logger=logger)
+
     clean_up()

@@ -106,6 +106,8 @@ def odesolver_Huch_dSt(score_func, xt, t, t_next, method = 'RK4',nnoise = 1, eps
         z_next , div_z_next = RK4_dSt().step(func, t, t_next - t, xt, eps)
     elif (method == 'Heun'):
         z_next , div_z_next = Heun_dSt().step(func, t, t_next - t, xt, eps)
+    elif (method == 'UniPC'):
+        z_next , div_z_next = UniPC().step(func, t, t_next - t, xt, eps)
     else:
         print('error unsupported method passed')
         return

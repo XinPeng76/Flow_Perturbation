@@ -1,6 +1,77 @@
 import torch
 import numpy as np
 from .utils import remove_mean, modify_samples_torch_batched_K
+import math
+import heapq
+
+def tv_reshuffle(weights):
+    """
+    Perform total‐variation resampling: map a probability vector `weights` of length S
+    to a list of indices (of total length S) by rounding fractional allocations.
+
+    Args:
+        weights (list of float): normalized weights summing to 1.
+
+    Returns:
+        indices (list of int): resampled indices, length = S.
+    """
+    S = len(weights)
+    # Scale weights by S to get real‐valued counts
+    a = [w * S for w in weights]
+    # Compute integer parts (floors) and fractional remainders
+    floors = [math.floor(x) for x in a]
+    deltas = [x - f for x, f in zip(a, floors)]
+    # Decide how many extra counts to assign based on sum of remainders
+    alpha = int(round(sum(deltas)))
+    # Sort indices by descending remainder and take top alpha to increment
+    idx_sorted = sorted(range(S), key=lambda i: deltas[i], reverse=True)
+    g = floors.copy()
+    for i in idx_sorted[:alpha]:
+        g[i] += 1
+    # Build the output index list by repeating each symbol s, g[s] times
+    indices = []
+    for s, count in enumerate(g):
+        indices += [s] * count
+    return indices
+
+def kl_reshuffle(w):
+    """
+    Perform KL‐optimal resampling: allocate S samples to indices 0..S-1
+    by maximizing the expected log‐weight gain at each step.
+
+    Args:
+        w (array‐like of float): unnormalized weights, length S.
+
+    Returns:
+        indices (ndarray of int): resampled indices, length = S.
+    """
+    S = len(w)
+    # Min‐heap storing tuples (-gain, index)
+    heap = []
+    # Allocation counts for each index
+    a = np.zeros(S, dtype=int)
+
+    # Initial gain for assigning the first copy: log(w_s / 1)
+    for s, ws in enumerate(w):
+        gain = np.log(ws)  # f(1,s) - f(0,s)
+        heapq.heappush(heap, (-gain, s))
+
+    total = 0
+    # Greedily assign one by one until total = S
+    while total < S:
+        neg_gain, s = heapq.heappop(heap)
+        # increase the copy count for index s
+        a[s] += 1
+        total += 1
+        # compute gain for next copy: 
+        # C⁺(a,s) = (a+1)·log(w_s/(a+1)) - a·log(w_s/a)
+        a_s = a[s]
+        gain = (a_s + 1) * np.log(w[s] / (a_s + 1)) - a_s * np.log(w[s] / a_s)
+        heapq.heappush(heap, (-gain, s))
+
+    # Build the index array by repeating each index s, a[s] times
+    indices = np.repeat(np.arange(S), a)
+    return indices
 
 
 def systematic_resampling(weights):
@@ -8,25 +79,27 @@ def systematic_resampling(weights):
     Perform systematic resampling given particle weights.
 
     Args:
-        weights (torch.Tensor): A 1D tensor of normalized weights (should sum to 1).
+        weights (np.ndarray): 1D array of normalized weights (should sum to 1).
 
     Returns:
-        torch.Tensor: Indices of the resampled particles.
+        np.ndarray: Indices of the resampled particles, length = N.
     """
-    N = weights.size(0)
+    weights = np.asarray(weights)
+    N = weights.shape[0]
 
     # Step 1: Compute the cumulative sum (CDF) of the weights
-    cdf = torch.cumsum(weights, dim=0)
+    cdf = np.cumsum(weights)
     # Ensure the last value of the CDF is exactly 1 (avoids precision issues)
     cdf[-1] = 1.0
+
     # Step 2: Generate a single random offset
-    start = torch.rand(1, device=weights.device) / N
+    start = np.random.rand() / N
 
     # Step 3: Generate positions using the systematic pattern
-    positions = start + torch.arange(N, device=weights.device) / N
+    positions = start + np.arange(N) / N
 
     # Step 4: Find the indices where positions fall in the CDF
-    indices = torch.searchsorted(cdf, positions, right=True)
+    indices = np.searchsorted(cdf, positions, side='right')
 
     return indices
 
@@ -100,7 +173,10 @@ def mc_step(xT, eps, log_omega, x0, ux, K_x, K_eps,get_log_omega, beta=1.0, tmax
     
         # Update the values for the samples that are accepted
         xT[index_move] = xT_new[index_move]
-        eps[index_move] = eps_new[index_move]
+        if len(eps_new.shape) == 3:
+            eps[:,index_move] = eps_new[:,index_move]
+        else:
+            eps[index_move] = eps_new[index_move]
         log_omega[index_move] = log_omega_new[index_move]
         x0[index_move] = x0_new[index_move]
         ux[index_move] = ux_new[index_move]
@@ -110,7 +186,7 @@ def mc_step(xT, eps, log_omega, x0, ux, K_x, K_eps,get_log_omega, beta=1.0, tmax
 
     return xT, eps, log_omega, x0, ux, accept_rate
 
-def resample_if_needed(ess, n_replicas, i, n_steps, xT, eps, log_omega, x0, ux, ansestors, total_logweight, weights,ess_threshold=0.95):
+def resample_if_needed(ess, n_replicas, i, n_steps, xT, eps, log_omega, x0, ux, ansestors, total_logweight, weights,ess_threshold=0.95,resample_method=systematic_resampling):
     """
     Resample the particles if the effective sample size (ESS) is below a threshold or on the second-to-last step.
 
@@ -127,16 +203,20 @@ def resample_if_needed(ess, n_replicas, i, n_steps, xT, eps, log_omega, x0, ux, 
         ansestors (torch.Tensor): The ancestors information used for resampling.
         weights (torch.Tensor): The weights used for resampling.
         ess_threshold (float): The threshold for the effective sample size.
+        resample_method (callable): The resampling method to use (default is systematic_resampling).
 
     Returns:
         torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, dict:
         The resampled xT, eps, log_omega, x0, ux, ansestors
     """
     if (ess < n_replicas * ess_threshold) or (i == n_steps - 2):  # Criteria for resampling
-        # Perform systematic resampling based on weights
-        resampled_indices = systematic_resampling(weights).to(xT.device)  # Get resampled indices
+        # Resample the particles
+        resampled_indices = resample_method(weights.cpu().numpy())  # Get resampled indices
         xT = xT[resampled_indices]  # Get the resampled xT, eps, log_omega, x0, and ux
-        eps = eps[resampled_indices]
+        if len(eps.shape) == 3:
+            eps = eps[:, resampled_indices]
+        else:
+            eps = eps[resampled_indices]
         log_omega = log_omega[resampled_indices]
         x0 = x0[resampled_indices]
         ux = ux[resampled_indices]

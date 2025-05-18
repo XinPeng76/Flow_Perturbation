@@ -4,6 +4,23 @@ import os
 import psutil  # pip install psutil
 import time
 import logging
+
+import importlib
+
+def str2obj(path: str):
+    """
+    Convert strings like "torch.optim.AdamW" or "math" into
+    the actual module, class, or function object.
+    """
+    if '.' not in path:
+        # No dot → treat entire string as a top‐level module
+        return importlib.import_module(path)
+    # Split into module path and attribute name
+    module_name, attr_name = path.rsplit('.', 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, attr_name)
+
+
 def clean_up():
     """
     Terminates all child processes of the current process.
@@ -58,10 +75,17 @@ def modify_samples_torch_batched_K(x, mean=0.0, std=1.0, K=1):
     Returns:
     - A PyTorch tensor with modified samples.
     """
-    nbatch, ndim = x.size()
+    if len(x.shape) == 2:
+        M = 1
+        sampN, ndim = x.shape
+    else:
+        M, sampN, ndim = x.shape
+    x = x.reshape(M * sampN, ndim)  # (M*sampN, ndim)
+    nbatch = M * sampN
+
     if isinstance(K, int):
         K = torch.ones(x.size(0), device=x.device, dtype=torch.long) * K
-    # Generate random values to pick dimensions
+
     rand_vals = torch.rand(nbatch, ndim, device=x.device)  # Random values for each dimension
     sorted_indices = rand_vals.argsort(dim=1)  # Sort indices based on random values for each row
 
@@ -76,8 +100,9 @@ def modify_samples_torch_batched_K(x, mean=0.0, std=1.0, K=1):
     
     # Modify only the selected dimensions
     x[random_dims_mask] = random_values[random_dims_mask]
-
-    return 
+    if M != 1:
+        x = x.reshape(M, sampN, ndim)  # Reshape back to original dimensions
+    return
 
 def generate_tsampling(epsilon, tmax, Nselected, rho):
     """
