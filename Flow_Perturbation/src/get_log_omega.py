@@ -73,7 +73,7 @@ def get_log_omega_FP_batch(xT,eps,exact_dynamics,time_backward,get_energy,tmax=1
 
     deltaSt =  m + torch.log(torch.exp(log_a - m).mean(dim=0))  # (sampN,)
     
-    # 7) 计算 log_omega
+    # 7) log_omega
     uz = torch.sum(xT**2/tmax**2, dim=-1)/2.0  + 0.5*ndim*np.log(2*np.pi)
     ux = get_energy(x0).reshape(-1)
     log_omega = -ux + deltaSt + uz
