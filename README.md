@@ -7,16 +7,19 @@ Jacobian calculations and the Hutchinson estimator.
 
 Publication
 -----------
-Please find the arxiv preprint here:
-[https://arxiv.org/abs/2407.10666](https://arxiv.org/abs/2407.10666)
+This work has been published in *Nature Communications*: [Nature Communications, 2025](https://www.nature.com/articles/s41467-025-62039-8)
 
 Citation update is coming up...
 ```
-@article{peng2024flow,
-  title={Flow Perturbation to Accelerate Unbiased Sampling of Boltzmann distribution},
+@article{peng2025flow,
+  title={Flow perturbation to accelerate Boltzmann sampling},
   author={Peng, Xin and Gao, Ang},
-  journal={arXiv preprint arXiv:2407.10666},
-  year={2024}
+  journal={Nature Communications},
+  volume={16},
+  number={1},
+  pages={6604},
+  year={2025},
+  publisher={Nature Publishing Group UK London}
 }
 ```
 ***
