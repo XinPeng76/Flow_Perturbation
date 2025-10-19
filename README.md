@@ -9,7 +9,6 @@ Publication
 -----------
 This work has been published in *Nature Communications*: [Nature Communications, 2025](https://www.nature.com/articles/s41467-025-62039-8)
 
-Citation update is coming up...
 ```
 @article{peng2025flow,
   title={Flow perturbation to accelerate Boltzmann sampling},
