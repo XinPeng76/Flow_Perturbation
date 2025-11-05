@@ -25,11 +25,11 @@ This work has been published in *Nature Communications*: [Nature Communications,
 # Dependencies
 * Mandatory
   * [pytorch>=2.0](https://github.com/pytorch/pytorch)
-  * [numpy](https://github.com/numpy/numpy)
+  * [numpy==1.26.4](https://github.com/numpy/numpy)
   * [easydict](https://pypi.org/project/easydict/)
   * [bgmol](https://github.com/noegroup/bgmol) (for  Chignolin)
   * [bgflow](https://github.com/noegroup/bgmol) (for  Chignolin)
-  * [mdtraj=1.9.9](https://github.com/mdtraj/mdtraj) (for  Chignolin)
+  * [mdtraj==1.9.9](https://github.com/mdtraj/mdtraj) (for  Chignolin)
 
 ## Training
 * All hyper-parameters and training details are provided in config files (), and free feel to tune these parameters../configs/*.yml
