@@ -1,5 +1,5 @@
 model:
-  type: MLP
+  type: MLP_nonorm
   ndim: 1000
   nwell: 2
   num_steps: 1000
