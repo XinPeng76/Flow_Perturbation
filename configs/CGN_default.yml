@@ -39,7 +39,7 @@ MC:
 SMC:
   n_steps: 1000
   nmc: 2
-  n_replicas: 1000
+  n_replicas: 2000
   Kmax_x: 20
   Kmax_eps: 20
   Kmin_x: 1
