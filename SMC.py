@@ -84,7 +84,7 @@ if __name__ == '__main__':
         n_particles = config.model.ndim//3
         get_energy = lambda x: CGN.get_energy_model(n_simulation_steps=0).energy(x)
         potential_fn = lambda x: CGN.get_energy_model(n_simulation_steps=0).force(x)
-        if_com = False
+        if_com = True
         RC_ratio = lambda x: dists5_ratio(x, n_particles=n_particles, n_dimensions=n_dimensions)
     else:
         raise ValueError('Dataset not implemented')
@@ -152,6 +152,9 @@ if __name__ == '__main__':
         eps_init = torch.randn(config.SMC.n_replicas, config.model.ndim).to(args.device)
     else:
         eps_init = torch.randn(args.M, config.SMC.n_replicas, config.model.ndim).to(args.device)
+    if if_com:
+        eps_init = remove_mean(eps_init, n_particles, n_dimensions)
+        xT_init = remove_mean(xT_init, n_particles, n_dimensions)
     log_omega_init, x0_init,ux_init = get_log_omega(xT_init, eps_init)
     xT = xT_init.clone()
     eps = eps_init.clone()
