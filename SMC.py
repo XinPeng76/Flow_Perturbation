@@ -79,7 +79,7 @@ if __name__ == '__main__':
     elif config.dataset.name == 'CGN':
         from bgmol.datasets import ChignolinOBC2PT
         is_data_here = os.path.isdir("ChignolinOBC2PT")
-        CGN = ChignolinOBC2PT(root="./", download=False, read=True, temperature=400.)
+        CGN = ChignolinOBC2PT(root="./", download=False, read=True, temperature=300.)
         n_dimensions = 3 
         n_particles = config.model.ndim//3
         get_energy = lambda x: CGN.get_energy_model(n_simulation_steps=0).energy(x)
