@@ -151,7 +151,7 @@ if __name__ == '__main__':
     accept_rate = torch.zeros(config.MC.mc_steps).to(args.device)
     for i in range(0, config.MC.mc_steps):
         # mc_step
-        xT, eps, log_omega, x0, ux, accept_rate[i] = mc_step(xT, eps, log_omega, x0, ux,K_x, K_eps, get_log_omega, config.MC.beta, nmc=1, if_K_eps=if_K_eps, \
+        xT, eps, log_omega, x0, ux, accept_rate[i] = mc_step(xT, eps, log_omega, x0, ux,K_x, K_eps, get_log_omega, config.MC.beta, tmax=config.Sampler.tmax, nmc=1, if_K_eps=if_K_eps, \
                                                               if_com = if_com, n_particles = n_particles, n_dimensions = n_dimensions)
         if i % config.MC.save_steps == 0:
             results['ux_mean'].append(ux.clone().mean().cpu().item())
