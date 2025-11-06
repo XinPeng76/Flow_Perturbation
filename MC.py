@@ -80,7 +80,7 @@ if __name__ == '__main__':
         n_particles = config.model.ndim//3
         get_energy = lambda x: CGN.get_energy_model(n_simulation_steps=0).energy(x)
         potential_fn = lambda x: CGN.get_energy_model(n_simulation_steps=0).force(x)
-        if_com = True
+        if_com = False
         RC_ratio = lambda x: dists5_ratio(x, n_particles=n_particles, n_dimensions=n_dimensions)
     else:
         raise ValueError('Dataset not implemented')
