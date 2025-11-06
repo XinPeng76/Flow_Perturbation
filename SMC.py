@@ -176,7 +176,7 @@ if __name__ == '__main__':
         Ki_x = int(K_x[i].item())
         Ki_eps = int(K_eps[i].item())
         # mc_step
-        xT, eps, log_omega, x0, ux, accept_rate[i] = mc_step(xT, eps, log_omega, x0, ux, Ki_x, Ki_eps, get_log_omega, betai, nmc=config.SMC.nmc, if_K_eps=if_K_eps, \
+        xT, eps, log_omega, x0, ux, accept_rate[i] = mc_step(xT, eps, log_omega, x0, ux, Ki_x, Ki_eps, get_log_omega, betai, tmax=config.Sampler.tmax, nmc=config.SMC.nmc, if_K_eps=if_K_eps, \
                                                               if_com = if_com, n_particles = n_particles, n_dimensions = n_dimensions)
         # resample
         total_logweight += (betaip1 - betai) * log_omega
