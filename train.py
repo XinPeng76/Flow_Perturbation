@@ -49,7 +49,7 @@ if __name__ == '__main__':
     elif config.dataset.name == 'CGN':
         from bgmol.datasets import ChignolinOBC2PT
         is_data_here = os.path.isdir("ChignolinOBC2PT")
-        CGN = ChignolinOBC2PT(root="./", download=False, read=True, temperature=400.)
+        CGN = ChignolinOBC2PT(root="./", download=False, read=True, temperature=300.)
         dataset = CGN.coordinates.reshape(-1, CGN.dim)
         n_dimensions = 3 
         n_particles = 175
@@ -86,3 +86,4 @@ if __name__ == '__main__':
 
 
     clean_up()
+
