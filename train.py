@@ -49,7 +49,7 @@ if __name__ == '__main__':
     elif config.dataset.name == 'CGN':
         from bgmol.datasets import ChignolinOBC2PT
         is_data_here = os.path.isdir("ChignolinOBC2PT")
-        CGN = ChignolinOBC2PT(download=not is_data_here, read=True)
+        CGN = ChignolinOBC2PT(root="./", download=False, read=True, temperature=400.)
         dataset = CGN.coordinates.reshape(-1, CGN.dim)
         n_dimensions = 3 
         n_particles = 175
@@ -83,5 +83,6 @@ if __name__ == '__main__':
                              config.model.num_steps,num_epoch=config.train.num_epoch,lr=config.train.lr, \
                              loss_DDPM = diffusion_loss_fn,decay_steps = config.train.decay_steps, \
                              noise_offset= config.train.noise_offset,opt=str2obj(config.train.opt),logger=logger)
+
 
     clean_up()
