@@ -5,22 +5,6 @@ Jacobian calculations and the Hutchinson estimator.
 
 ![Flow Perturbation](./figures/ODE_pf.png "Title")
 
-Publication
------------
-This work has been published in *Nature Communications*: [Nature Communications, 2025](https://www.nature.com/articles/s41467-025-62039-8)
-
-```
-@article{peng2025flow,
-  title={Flow perturbation to accelerate Boltzmann sampling},
-  author={Peng, Xin and Gao, Ang},
-  journal={Nature Communications},
-  volume={16},
-  number={1},
-  pages={6604},
-  year={2025},
-  publisher={Nature Publishing Group UK London}
-}
-```
 ***
 # Dependencies
 * Mandatory
@@ -76,9 +60,6 @@ python SMC.py ./configs/CGN_default.yml ./models/CGN --method 0 --eps_type Radem
 
 ## Model and Data
 * The result datasets presented in the paper can be found in the `Result` folder of this repository.
-
-* We provide all pre-trained model checkpoints as well as other result datasets from the paper. These resources are hosted on Hugging Face:
-  * [Model and Result Folder](https://huggingface.co/XinPeng76/Flow_Perturbation)
 
 
 ## [License](#dependencies)
